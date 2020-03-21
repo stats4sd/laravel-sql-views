@@ -52,19 +52,19 @@ If you discover any security related issues, please email author email instead o
 ## Credits
 
 - [Dave Mills][https://github.com/dave-mills]
-- [Stats4SD][https://stats4sd.org]
+- [Stats4SD][link-contributors]
 
 ## License
 
 MIT license. Please see the [license file](license.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/stats4sd/sqlviews.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/stats4sd/sqlviews.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/stats4sd/laravel-sql-views?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/stats4sd/laravel-sql-views?style=flat-square
 
-[ico-styleci]: https://styleci.io/repos/12345678/shield
+[ico-styleci]: https://github.styleci.io/repos/248978421/shield
 
-[link-packagist]: https://packagist.org/packages/stats4sd/sqlviews
-[link-downloads]: https://packagist.org/packages/stats4sd/sqlviews
-[link-styleci]: https://styleci.io/repos/12345678
+[link-packagist]: https://packagist.org/packages/stats4sd/laravel-sql-views
+[link-downloads]: https://packagist.org/packages/stats4sd/laravel-sql-views
+[link-styleci]: https://github.styleci.io/repos/248978421
 [link-author]: https://github.com/stats4sd
-[link-contributors]: ../../contributors
+[link-contributors]: https://github.com/stats4sd
