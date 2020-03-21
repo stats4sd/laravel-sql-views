@@ -1,6 +1,6 @@
 {
-    "name": "stats4sd/sqlviews",
-    "description": ":A small package to help automate the creation and updating of MySQL views.",
+    "name": "stats4sd/laravel-sql-views",
+    "description": "A small package to help automate the creation and updating of MySQL views within a Laravel project.",
     "license": "MIT",
     "authors": [
         {
@@ -9,7 +9,7 @@
             "homepage": "https://stats4sd.org"
         }
     ],
-    "homepage": "https://github.com/stats4sd/sqlviews",
+    "homepage": "https://github.com/stats4sd/laravel-sql-views",
     "keywords": ["Laravel", "Sql"],
     "require": {
         "illuminate/support": "~5|~6|~7"
