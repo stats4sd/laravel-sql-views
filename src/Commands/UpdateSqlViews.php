@@ -7,11 +7,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-
 /**
  * A CLI tool that searches through the database/views folder, finds all .sql files and inserts them as new SQL views into the database.
  * Uses the filename as the View name.
- *
  */
 class UpdateSqlViews extends Command
 {
@@ -46,42 +44,36 @@ class UpdateSqlViews extends Command
      */
     public function handle()
     {
-
         $countViews = $this->processDir('database/views');
 
-        $this->info($countViews . " views created");
-
+        $this->info($countViews.' views created');
     }
 
     /**
-     * Takes a directory path and scans it (and all subfolders) for .sql files to turn into MySQL Views
-     * @param  String $dir_path path/to/mysql_view/storage
-     * @return Integer      Count of views created or updated;
+     * Takes a directory path and scans it (and all subfolders) for .sql files to turn into MySQL Views.
+     * @param  string $dir_path path/to/mysql_view/storage
+     * @return int      Count of views created or updated;
      */
-    public function processDir (String $dir_path)
+    public function processDir(string $dir_path)
     {
-
         $files = scandir($dir_path);
         $countViews = 0;
 
         //iterate through subfolders and add to main set of files to check
-        foreach($files as $file) {
-
-            if(is_dir("${dir_path}/${file}") && $file != "." && $file != "..") {
-
+        foreach ($files as $file) {
+            if (is_dir("${dir_path}/${file}") && $file != '.' && $file != '..') {
                 $folder_files = scandir("${dir_path}/${file}");
 
                 // engage recursion...
                 $this->processDir("${dir_path}/${file}");
-
             }
         }
 
         //reset all views to "placeholder" views - to avoid problems when a view relies on another view that is not yet created;
-        foreach($files as $file) {
-            if(Str::endsWith($file, '.sql')) {
+        foreach ($files as $file) {
+            if (Str::endsWith($file, '.sql')) {
                 $query = file_get_contents("${dir_path}/${file}");
-                $name = Str::replaceLast(".sql", "", $file);
+                $name = Str::replaceLast('.sql', '', $file);
 
                 $query = $this->makePlaceholderView($name, $query);
                 $this->makeView($name, $query);
@@ -89,31 +81,31 @@ class UpdateSqlViews extends Command
         }
 
         //Need to iterate through all the files twice, to avoid creating a "final" view before all "placeholder" views are created;
-        foreach($files as $file) {
-            if(Str::endsWith($file, '.sql')) {
+        foreach ($files as $file) {
+            if (Str::endsWith($file, '.sql')) {
                 $query = file_get_contents("${dir_path}/${file}");
-                $name = Str::replaceLast(".sql", "", $file);
+                $name = Str::replaceLast('.sql', '', $file);
 
                 $done = $this->makeView($name, $query);
-                if($done) {
+                if ($done) {
                     $countViews++;
                 }
             }
         }
 
         return $countViews;
-
     }
 
     /**
-     * Creates or updates the mySQL View
-     * @param  String $name  Name of the view
-     * @param  String $query Query to use for the View
-     * @return Boolean       Successfully added View
+     * Creates or updates the mySQL View.
+     * @param  string $name  Name of the view
+     * @param  string $query Query to use for the View
+     * @return bool       Successfully added View
      */
-    public function makeView (String $name, String $query)
+    public function makeView(string $name, string $query)
     {
         $view = "CREATE OR REPLACE VIEW ${name} AS \n${query}";
+
         return DB::statement($view);
     }
 
@@ -123,38 +115,35 @@ class UpdateSqlViews extends Command
      *         1 as column_one_name,
      *         1 as column_two_name,
      *         ...
-     * This means it requires no other tables or views to exist;
-     * @param  String $name  Name for the MySQL View
-     * @param  String $query Query for the real MySQL View
-     * @return String        Query for "placeholder" MySQL View
+     * This means it requires no other tables or views to exist;.
+     * @param  string $name  Name for the MySQL View
+     * @param  string $query Query for the real MySQL View
+     * @return string        Query for "placeholder" MySQL View
      */
-    public function makePlaceholderView (String $name, String $query)
+    public function makePlaceholderView(string $name, string $query)
     {
-
         $query = strtolower($query);
 
         //Determine if subqueries are used anywhere:
         //(Subqueries after the main
-        if(substr_count($query, "select") > 1) {
-
-            $test = explode("from", $query);
+        if (substr_count($query, 'select') > 1) {
+            $test = explode('from', $query);
 
             // if there is a second SELECT before the first FROM, the query includes subqueries in the main segment:
-            if(substr_count($test[0], "select") > 1) {
-
+            if (substr_count($test[0], 'select') > 1) {
                 $pos = 0;
-                $selectCount = substr_count($test[$pos], "select");
+                $selectCount = substr_count($test[$pos], 'select');
 
-                $query = "";
+                $query = '';
 
-                    while($selectCount > 0) {
-                        if(!isset($test[$pos])){
-                            dd($file, $test);
-                        }
-                        $query .= $test[$pos];
-                        $selectCount = substr_count($test[$pos], "select");
-                        $pos++;
+                while ($selectCount > 0) {
+                    if (! isset($test[$pos])) {
+                        dd($file, $test);
                     }
+                    $query .= $test[$pos];
+                    $selectCount = substr_count($test[$pos], 'select');
+                    $pos++;
+                }
             }
 
             //subqueries are only used in JOINs on the main query...
@@ -163,32 +152,29 @@ class UpdateSqlViews extends Command
             }
 
             //add back "FROM" so regex below will still work fine:
-            $query .= " FROM";
+            $query .= ' FROM';
         }
 
-
         //strip everything FROM onward
-        preg_match_all("/SELECT(.*)FROM/is", $query, $stripped);
+        preg_match_all('/SELECT(.*)FROM/is', $query, $stripped);
 
         //remove excess spaces and newlines
         $qstr = trim(preg_replace('/\s+/', ' ', $stripped[1][0]));
 
         //Split by commas, but only ones not inside a function (within brackets)
-        $qarray = $this->parseBrackets($qstr, ",");
+        $qarray = $this->parseBrackets($qstr, ',');
 
-        $columnNames = array_map(function($item){
-
-            if(Str::contains($item, "as ")) {
-                $name = Str::afterLast($item, "as ");
-            }
-            else {
+        $columnNames = array_map(function ($item) {
+            if (Str::contains($item, 'as ')) {
+                $name = Str::afterLast($item, 'as ');
+            } else {
                 $segments = preg_split('/\.(?![^\(]*\))/s', $item);
                 $name = Arr::last($segments);
             }
 
             //if backticks are used, just grab everything between the backticks
             //...but ignore anything inside brackets, as that denotes a mysql function...
-            if(preg_match('/\`(?![^\(]*\))/s', $name)) {
+            if (preg_match('/\`(?![^\(]*\))/s', $name)) {
                 preg_match('/\`(?![^\(]*\))(.+)\`(?![^\(]*\))/', $name, $colName);
 
                 return $colName[1];
@@ -196,44 +182,42 @@ class UpdateSqlViews extends Command
 
             //strip spaces
             $colName = preg_replace('/\s+/', '', $name);
-            return $colName;
 
+            return $colName;
         }, $qarray);
 
         //now, define a placeholder view using the exact column-names to be used in the final view:
-        $tempQuery = array_map(function($item) {
+        $tempQuery = array_map(function ($item) {
             return "1 AS `${item}`";
         }, $columnNames);
 
-        $tempQueryStr = implode(", ", $tempQuery) . ";";
+        $tempQueryStr = implode(', ', $tempQuery).';';
 
-        return "SELECT " . $tempQueryStr;
+        return 'SELECT '.$tempQueryStr;
     }
 
     /**
      * Function to split a string by substring, but ONLY when the substring is not within brackets.
      *         // Taken from Gumbo's answer at Stack Overflow:
-     *         https://stackoverflow.com/questions/1084764/php-and-regex-split-a-string-by-commas-that-are-not-inside-brackets-and-also-n
-     * @param  String $str The haystack - the string to search within
-     * @param  String $substr The needle - the string to split by
-     * @return Array     An array containing the results of the split
+     *         https://stackoverflow.com/questions/1084764/php-and-regex-split-a-string-by-commas-that-are-not-inside-brackets-and-also-n.
+     * @param  string $str The haystack - the string to search within
+     * @param  string $substr The needle - the string to split by
+     * @return array     An array containing the results of the split
      */
-    public function parseBrackets (String $str, $substr)
+    public function parseBrackets(string $str, $substr)
     {
-
-
         $buffer = '';
-        $stack = array();
+        $stack = [];
         $depth = 0;
         $len = strlen($str);
-        for ($i=0; $i<$len; $i++) {
+        for ($i = 0; $i < $len; $i++) {
             $char = $str[$i];
             switch ($char) {
             case '(':
                 $depth++;
                 break;
             case $substr:
-                if (!$depth) {
+                if (! $depth) {
                     if ($buffer !== '') {
                         $stack[] = $buffer;
                         $buffer = '';
@@ -256,7 +240,7 @@ class UpdateSqlViews extends Command
         if ($buffer !== '') {
             $stack[] = $buffer;
         }
+
         return $stack;
     }
-
 }
