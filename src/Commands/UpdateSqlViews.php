@@ -44,8 +44,7 @@ class UpdateSqlViews extends Command
      */
     public function handle()
     {
-        $countViews = $this->processDir('database/views');
-
+        $countViews = $this->processDir(base_path('database/views'));
         $this->info($countViews.' views created');
     }
 
