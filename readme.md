@@ -17,7 +17,7 @@ This package lets you store the query definition for every MySQL view you need w
 Via Composer
 
 ``` bash
-$ composer require stats4sd/sqlviews
+$ composer require stats4sd/laravel-sql-views
 ```
 
 ## Usage
