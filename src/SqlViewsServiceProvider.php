@@ -45,7 +45,7 @@ class SqlViewsServiceProvider extends ServiceProvider
 
         if (!is_dir(base_path('database/procedures'))) {
             mkdir(base_path('database/procedures'));
-            copy(__DIR__ . '/database/procedures/example-proc.sql', base_path('database/views/example-proc.sql'));
+            copy(__DIR__ . '/database/procedures/example-proc.sql', base_path('database/procedures/example-proc.sql'));
         }
 
         // Register the service the package provides.
