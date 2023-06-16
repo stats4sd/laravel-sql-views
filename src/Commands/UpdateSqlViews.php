@@ -71,12 +71,15 @@ class UpdateSqlViews extends Command
 
         foreach ($files as $file) {
 
-            $query = file_get_contents("{$dir_path}/{$file}");
+            if (Str::endsWith($file, '.sql')) {
 
-            $done = DB::statement($query);
+                $query = file_get_contents("{$dir_path}/{$file}");
 
-            if($done) {
-                $countProcs++;
+                $done = DB::statement($query);
+
+                if ($done) {
+                    $countProcs++;
+                }
             }
         }
     }
@@ -98,7 +101,7 @@ class UpdateSqlViews extends Command
                 $folder_files = scandir("{$dir_path}/{$file}");
 
                 // engage recursion...
-                $done = $this->processDir("{$dir_path}/{$file}");
+                $this->processDir("{$dir_path}/{$file}");
             }
         }
 
