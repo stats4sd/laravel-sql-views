@@ -71,7 +71,7 @@ class UpdateSqlViews extends Command
 
         foreach ($files as $file) {
 
-            $query = file_get_contents("${dir_path}/${file}");
+            $query = file_get_contents("{$dir_path}/{$file}");
 
             $done = DB::statement($query);
 
@@ -94,18 +94,18 @@ class UpdateSqlViews extends Command
 
         //iterate through subfolders and add to main set of files to check
         foreach ($files as $file) {
-            if (is_dir("${dir_path}/${file}") && $file != '.' && $file != '..') {
-                $folder_files = scandir("${dir_path}/${file}");
+            if (is_dir("{$dir_path}/{$file}") && $file != '.' && $file != '..') {
+                $folder_files = scandir("{$dir_path}/{$file}");
 
                 // engage recursion...
-                $done = $this->processDir("${dir_path}/${file}");
+                $done = $this->processDir("{$dir_path}/{$file}");
             }
         }
 
         //reset all views to "placeholder" views - to avoid problems when a view relies on another view that is not yet created;
         foreach ($files as $file) {
             if (Str::endsWith($file, '.sql')) {
-                $query = file_get_contents("${dir_path}/${file}");
+                $query = file_get_contents("{$dir_path}/{$file}");
                 $name = Str::replaceLast('.sql', '', $file);
 
                 $query = $this->makePlaceholderView($name, $query);
@@ -116,7 +116,7 @@ class UpdateSqlViews extends Command
         //Need to iterate through all the files twice, to avoid creating a "final" view before all "placeholder" views are created;
         foreach ($files as $file) {
             if (Str::endsWith($file, '.sql')) {
-                $query = file_get_contents("${dir_path}/${file}");
+                $query = file_get_contents("{$dir_path}/{$file}");
                 $name = Str::replaceLast('.sql', '', $file);
 
                 $done = $this->makeView($name, $query);
@@ -137,7 +137,7 @@ class UpdateSqlViews extends Command
      */
     public function makeView(string $name, string $query)
     {
-        $view = "CREATE OR REPLACE VIEW ${name} AS \n${query}";
+        $view = "CREATE OR REPLACE VIEW {$name} AS \n{$query}";
 
         return DB::statement($view);
     }
@@ -221,7 +221,7 @@ class UpdateSqlViews extends Command
 
         //now, define a placeholder view using the exact column-names to be used in the final view:
         $tempQuery = array_map(function ($item) {
-            return "1 AS `${item}`";
+            return "1 AS `{$item}`";
         }, $columnNames);
 
         $tempQueryStr = implode(', ', $tempQuery) . ';';

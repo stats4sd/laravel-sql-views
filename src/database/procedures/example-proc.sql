@@ -1,4 +1,4 @@
-CREATE PROCEDURE `multiply`(IN num_one INT, IN num_two INT, OUT result OUT)
+CREATE PROCEDURE `multiply` (IN num_one INT, IN num_two INT, OUT result OUT)
 
 BEGIN
 
