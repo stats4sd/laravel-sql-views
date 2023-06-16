@@ -75,7 +75,7 @@ class UpdateSqlViews extends Command
 
                 $query = file_get_contents("{$dir_path}/{$file}");
 
-                $done = DB::statement($query);
+                $done = DB::unprepared($query);
 
                 if ($done) {
                     $countProcs++;
