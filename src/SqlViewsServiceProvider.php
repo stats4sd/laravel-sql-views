@@ -43,6 +43,11 @@ class SqlViewsServiceProvider extends ServiceProvider
             copy(__DIR__.'/database/views/example.sql', base_path('database/views/example.sql'));
         }
 
+        if (!is_dir(base_path('database/procedures'))) {
+            mkdir(base_path('database/procedures'));
+            copy(__DIR__ . '/database/procedures/example-proc.sql', base_path('database/procedures/example-proc.sql'));
+        }
+
         // Register the service the package provides.
         $this->app->singleton('sqlviews', function ($app) {
             return new SqlViews;

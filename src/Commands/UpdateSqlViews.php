@@ -25,7 +25,7 @@ class UpdateSqlViews extends Command
      *
      * @var string
      */
-    protected $description = 'Creates / Replaces all mySQL Views in the database with those in the database/views folder';
+    protected $description = 'Creates / Replaces all mySQL Views in the database with those in the database/views folder, and runs any additional functions in the procedures folder.';
 
     /**
      * Create a new command instance.
@@ -45,8 +45,45 @@ class UpdateSqlViews extends Command
     public function handle()
     {
         $countViews = $this->processDir(base_path('database/views'));
-        $this->info($countViews.' views created');
+        $this->info($countViews . ' views created');
+
+
+        $countProcs = $this->processProcsDir(base_path('database/procedures'));
+        $this->info($countProcs . ' procedures run');
     }
+
+    public function processProcsDir(string $dir_path)
+    {
+
+        // process procs
+        $files = scandir(base_path('database/procedures'));
+        $countProcs = 0;
+
+        //iterate through subfolders and add to main set of files to check
+        foreach ($files as $file) {
+            if (is_dir("{$dir_path}/{$file}") && $file != '.' && $file != '..') {
+                $folder_files = scandir("{$dir_path}/{$file}");
+
+                // engage recursion...
+                $this->processDir("{$dir_path}/{$file}");
+            }
+        }
+
+        foreach ($files as $file) {
+
+            if (Str::endsWith($file, '.sql')) {
+
+                $query = file_get_contents("{$dir_path}/{$file}");
+
+                $done = DB::unprepared($query);
+
+                if ($done) {
+                    $countProcs++;
+                }
+            }
+        }
+    }
+
 
     /**
      * Takes a directory path and scans it (and all subfolders) for .sql files to turn into MySQL Views.
@@ -60,18 +97,18 @@ class UpdateSqlViews extends Command
 
         //iterate through subfolders and add to main set of files to check
         foreach ($files as $file) {
-            if (is_dir("${dir_path}/${file}") && $file != '.' && $file != '..') {
-                $folder_files = scandir("${dir_path}/${file}");
+            if (is_dir("{$dir_path}/{$file}") && $file != '.' && $file != '..') {
+                $folder_files = scandir("{$dir_path}/{$file}");
 
                 // engage recursion...
-                $this->processDir("${dir_path}/${file}");
+                $this->processDir("{$dir_path}/{$file}");
             }
         }
 
         //reset all views to "placeholder" views - to avoid problems when a view relies on another view that is not yet created;
         foreach ($files as $file) {
             if (Str::endsWith($file, '.sql')) {
-                $query = file_get_contents("${dir_path}/${file}");
+                $query = file_get_contents("{$dir_path}/{$file}");
                 $name = Str::replaceLast('.sql', '', $file);
 
                 $query = $this->makePlaceholderView($name, $query);
@@ -82,7 +119,7 @@ class UpdateSqlViews extends Command
         //Need to iterate through all the files twice, to avoid creating a "final" view before all "placeholder" views are created;
         foreach ($files as $file) {
             if (Str::endsWith($file, '.sql')) {
-                $query = file_get_contents("${dir_path}/${file}");
+                $query = file_get_contents("{$dir_path}/{$file}");
                 $name = Str::replaceLast('.sql', '', $file);
 
                 $done = $this->makeView($name, $query);
@@ -103,7 +140,7 @@ class UpdateSqlViews extends Command
      */
     public function makeView(string $name, string $query)
     {
-        $view = "CREATE OR REPLACE VIEW ${name} AS \n${query}";
+        $view = "CREATE OR REPLACE VIEW {$name} AS \n{$query}";
 
         return DB::statement($view);
     }
@@ -136,7 +173,7 @@ class UpdateSqlViews extends Command
                 $query = '';
 
                 while ($selectCount > 0) {
-                    if (! isset($test[$pos])) {
+                    if (!isset($test[$pos])) {
                         dd($file, $test);
                     }
                     $query .= $test[$pos];
@@ -187,12 +224,12 @@ class UpdateSqlViews extends Command
 
         //now, define a placeholder view using the exact column-names to be used in the final view:
         $tempQuery = array_map(function ($item) {
-            return "1 AS `${item}`";
+            return "1 AS `{$item}`";
         }, $columnNames);
 
-        $tempQueryStr = implode(', ', $tempQuery).';';
+        $tempQueryStr = implode(', ', $tempQuery) . ';';
 
-        return 'SELECT '.$tempQueryStr;
+        return 'SELECT ' . $tempQueryStr;
     }
 
     /**
@@ -212,27 +249,27 @@ class UpdateSqlViews extends Command
         for ($i = 0; $i < $len; $i++) {
             $char = $str[$i];
             switch ($char) {
-            case '(':
-                $depth++;
-                break;
-            case $substr:
-                if (! $depth) {
-                    if ($buffer !== '') {
-                        $stack[] = $buffer;
-                        $buffer = '';
+                case '(':
+                    $depth++;
+                    break;
+                case $substr:
+                    if (!$depth) {
+                        if ($buffer !== '') {
+                            $stack[] = $buffer;
+                            $buffer = '';
+                        }
+                        continue 2;
                     }
-                    continue 2;
-                }
-                break;
-            case ')':
-                if ($depth) {
-                    $depth--;
-                } else {
-                    $stack[] = $buffer.$char;
-                    $buffer = '';
-                    continue 2;
-                }
-                break;
+                    break;
+                case ')':
+                    if ($depth) {
+                        $depth--;
+                    } else {
+                        $stack[] = $buffer . $char;
+                        $buffer = '';
+                        continue 2;
+                    }
+                    break;
             }
             $buffer .= $char;
         }
