@@ -32,9 +32,16 @@ To use:
 It will search the folder recursively, so you can organise your views into subfolders if you wish.
 
 The packge comes with a tiny config file.
+```
+php artisan vendor:publish --tag=sqlviews.config
+```
 
-
-
+To disable the automatic creation of either the `database/views` and/or `database/procedures` folder(s) you can add the following `.env` variables :-
+```
+SQL_VIEWS_REGISTER_VIEWS_FOLDER=false
+SQL_VIEWS_REGISTER_PROCEDURES_FOLDER=false
+```
+Please note that disabling folder creation without a good understanding of this package will cause you issues.
 
 ## Change log
 

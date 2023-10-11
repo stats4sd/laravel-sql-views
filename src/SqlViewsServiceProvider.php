@@ -38,12 +38,12 @@ class SqlViewsServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/sqlviews.php', 'sqlviews');
 
         //create the default folder for storing mysql view definitions
-        if (! is_dir(base_path('database/views'))) {
+        if (! is_dir(base_path('database/views')) && config('sqlviews.folder.create.views')) {
             mkdir(base_path('database/views'));
             copy(__DIR__.'/database/views/example.sql', base_path('database/views/example.sql'));
         }
 
-        if (!is_dir(base_path('database/procedures'))) {
+        if (!is_dir(base_path('database/procedures')) && config('sqlviews.folder.create.procedures')) {
             mkdir(base_path('database/procedures'));
             copy(__DIR__ . '/database/procedures/example-proc.sql', base_path('database/procedures/example-proc.sql'));
         }
