@@ -4,9 +4,9 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 [![StyleCI][ico-styleci]][link-styleci]
 
-A small package to help automate the creation and updating of MySQL views.
+A small package to help automate the creation and updating of MySQL views and procedures.
 
-This package lets you store the query definition for every MySQL view you need within your Laravel codebase, and lets you edit the SQL query strings directly instead of using migration files. This is useful when:
+This package lets you store the query definition for every MySQL view and stored procedure you need within your Laravel codebase, and lets you edit the SQL query strings directly instead of using migration files. This is useful when:
 
   - You regularly create or update SQL views with real data, e.g. as part of a data analysis workflow.
   - You have a set of complex queries that would involve you basically writing out the raw query within a migration file anyway.
@@ -22,14 +22,20 @@ $ composer require stats4sd/laravel-sql-views
 
 ## Usage
 
-The package includes a single console command that will create or update the SQL views in your database based on the files within your `database/views` directory. It will create a view for every `.sql` file it finds, using the filename as the view name and the contents as the query definition.
+The package includes a single console command `php artisan updatesql`. This command does 2 things: 
+
+1. It will create or update the SQL views in your database based on the files within your `database/views` directory. It will create a view for every `.sql` file it finds, using the filename as the view name and the contents as the query definition.
+2. It will create or update SQL procedures in your database based on the files within your `database/procedures` directory. It will run all `.sql` files in that directly verbatim. The intention is that you would include scripts to create the required procedures, but in theory you could include any SQL code that you want to run on a regular basis. 
+
 
 To use:
+
 1. Place your query definitions within .sql files inside your `database/views` directory. You need 1 file per view. Do not include the "CREATE OR REPLACE VIEW" segment, just include the query definition itself.
-2. Run the command with `php artisan updatesql`.
+2. Place any additional SQL scripts you want to run, e.g. to create stored procedures, into the `database/procedures` folder. 
+3. Run the command with `php artisan updatesql`.
 
 
-It will search the folder recursively, so you can organise your views into subfolders if you wish.
+It will search the folders recursively, so you can organise your views into subfolders if you wish.
 
 The packge comes with a tiny config file.
 ```
