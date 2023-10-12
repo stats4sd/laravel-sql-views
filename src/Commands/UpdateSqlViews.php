@@ -44,12 +44,15 @@ class UpdateSqlViews extends Command
      */
     public function handle()
     {
-        $countViews = $this->processDir(base_path('database/views'));
-        $this->info($countViews . ' views created');
+        if (config('sqlviews.folder.create.views')) {
+            $countViews = $this->processDir(base_path('database/views'));
+            $this->info($countViews . ' views created');
+        }
 
-
-        $countProcs = $this->processProcsDir(base_path('database/procedures'));
-        $this->info($countProcs . ' procedures run');
+        if (config('sqlviews.folder.create.procedures')) {
+            $countProcs = $this->processProcsDir(base_path('database/procedures'));
+            $this->info($countProcs . ' procedures run');
+        }
     }
 
     public function processProcsDir(string $dir_path)
