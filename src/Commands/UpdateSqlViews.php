@@ -66,7 +66,7 @@ class UpdateSqlViews extends Command
                 $folder_files = scandir("{$dir_path}/{$file}");
 
                 // engage recursion...
-                $this->processDir("{$dir_path}/{$file}");
+                $this->processProcsDir("{$dir_path}/{$file}");
             }
         }
 
