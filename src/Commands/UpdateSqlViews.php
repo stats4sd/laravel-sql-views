@@ -44,22 +44,20 @@ class UpdateSqlViews extends Command
      */
     public function handle()
     {
-        if (config('sqlviews.folder.create.views')) {
-            $countViews = $this->processDir(base_path('database/views'));
-            $this->info($countViews . ' views created');
-        }
-
         if (config('sqlviews.folder.create.procedures')) {
             $countProcs = $this->processProcsDir(base_path('database/procedures'));
             $this->info($countProcs . ' procedures run');
+        }
+
+        if (config('sqlviews.folder.create.views')) {
+            $countViews = $this->processDir(base_path('database/views'));
+            $this->info($countViews . ' views created');
         }
     }
 
     public function processProcsDir(string $dir_path)
     {
-
-        // process procs
-        $files = scandir(base_path('database/procedures'));
+        $files = scandir($dir_path);
         $countProcs = 0;
 
         //iterate through subfolders and add to main set of files to check
@@ -73,9 +71,7 @@ class UpdateSqlViews extends Command
         }
 
         foreach ($files as $file) {
-
             if (Str::endsWith($file, '.sql')) {
-
                 $query = file_get_contents("{$dir_path}/{$file}");
 
                 $done = DB::unprepared($query);
@@ -85,6 +81,8 @@ class UpdateSqlViews extends Command
                 }
             }
         }
+
+        return $countProcs;
     }
 
 
