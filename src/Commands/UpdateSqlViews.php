@@ -85,6 +85,8 @@ class UpdateSqlViews extends Command
                 }
             }
         }
+
+        return $countProcs;
     }
 
 
